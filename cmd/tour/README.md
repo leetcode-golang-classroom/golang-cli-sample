@@ -1,8 +1,28 @@
 # tour
 
-字串轉換工具
+字串轉換工具以及時間處理工具
 
-## main.go
+## 主要指令邏輯
+
+```golang
+package commands
+
+import "github.com/spf13/cobra"
+
+var rootCmd = &cobra.Command{}
+
+func Execute() error {
+	return rootCmd.Execute()
+}
+
+func init() {
+	rootCmd.AddCommand(wordCmd)
+	rootCmd.AddCommand(timeCmd)
+}
+
+```
+
+## word 指令邏輯
 
 ```golang
 package commands
@@ -66,3 +86,83 @@ func init() {
 }
 ```
 
+## 時間主要指令
+
+```golang
+package commands
+
+import (
+	"log"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/leetcode-golang-classroom/golang-cli-sample/internal/timer"
+	"github.com/spf13/cobra"
+)
+
+var calculateTime string
+var duration string
+
+var timeCmd = &cobra.Command{
+	Use:   "time",
+	Short: "時間格式處理",
+	Long:  "時間格式處理",
+	Run: func(cmd *cobra.Command, args []string) {
+
+	},
+}
+var nowTimeCmd = &cobra.Command{
+	Use:   "now",
+	Short: "取得現在時間",
+	Long:  "取得現在時間",
+	Run: func(cmd *cobra.Command, args []string) {
+		nowTime := timer.GetNowTime()
+		log.Printf("輸出結果: %s, %d\n", nowTime.Format(time.RFC3339), nowTime.Unix())
+	},
+}
+
+var calculateTimeCmd = &cobra.Command{
+	Use:   "calc",
+	Short: "計算所需時間",
+	Long:  "計算所需時間",
+	Run: func(cmd *cobra.Command, args []string) {
+		var currentTimer time.Time
+		var layout = "2006-01-02 15:04:05"
+		if calculateTime == "" {
+			currentTimer = timer.GetNowTime()
+		} else {
+			var err error
+			space := strings.Count(calculateTime, " ")
+			if space == 0 {
+				layout = "2006-01-02"
+			}
+			if space == 1 {
+				layout = "2006-01-02 15:04:05"
+			}
+			currentTimer, err = time.Parse(layout, calculateTime)
+			if err != nil {
+				t, err := strconv.Atoi(calculateTime)
+				if err != nil {
+					log.Fatalf("strconv calculateTime err: %v", err)
+				}
+				currentTimer = time.Unix(int64(t), 0)
+			}
+		}
+		t, err := timer.GetCalculateTime(currentTimer, duration)
+		if err != nil {
+			log.Fatalf("timeer.GetCalculateTime err: %v", err)
+		}
+		log.Printf("輸出結果: %s, %d\n", t.Format(layout), t.Unix())
+	},
+}
+
+func init() {
+	timeCmd.AddCommand(nowTimeCmd)
+	timeCmd.AddCommand(calculateTimeCmd)
+	calculateTimeCmd.Flags().StringVarP(&calculateTime, "calculate", "c", "", `需要計算的時間，有效時間單位為時間戳記或是格式化之後的時間`)
+	calculateTimeCmd.Flags().StringVarP(&duration, "duration", "d", "0s", `持續時間，有效時間單位為"ns","us","ms", "s", "m", "h"`)
+}
+```
+
+特別可以注意到的是 timeCmd 包含著 nowTimeCmd 與　calculateTimeCmd　兩個子指令。這兩個子指令必須要在 timeCmd 作 AddCommand 才能夠生效。
