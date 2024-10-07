@@ -166,3 +166,9 @@ func init() {
 ```
 
 特別可以注意到的是 timeCmd 包含著 nowTimeCmd 與　calculateTimeCmd　兩個子指令。這兩個子指令必須要在 timeCmd 作 AddCommand 才能夠生效。
+
+## 時區問題
+
+在初始化 Local 時，預設會從　/etc/localtime 取出時區。
+假設想要指定時區，可以特別使用　LoadLocation 讀出時區格式，然後設定到　timer 上
+特別注意的是想要　Parse 時間字串為某個時區的格式，必須使用 ParseInLocation 帶入設定的時區

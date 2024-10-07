@@ -41,6 +41,7 @@ var calculateTimeCmd = &cobra.Command{
 		if calculateTime == "" {
 			currentTimer = timer.GetNowTime()
 		} else {
+			location, _ := time.LoadLocation("Asia/Taipei")
 			var err error
 			space := strings.Count(calculateTime, " ")
 			if space == 0 {
@@ -49,7 +50,7 @@ var calculateTimeCmd = &cobra.Command{
 			if space == 1 {
 				layout = "2006-01-02 15:04:05"
 			}
-			currentTimer, err = time.Parse(layout, calculateTime)
+			currentTimer, err = time.ParseInLocation(layout, calculateTime, location)
 			if err != nil {
 				t, err := strconv.Atoi(calculateTime)
 				if err != nil {
