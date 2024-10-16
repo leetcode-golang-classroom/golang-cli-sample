@@ -15,6 +15,9 @@ build-self:
 build-tour:
 	@CGO_ENABLED=0 GOOS=linux go build -o bin/tour cmd/tour/main.go
 
+build-template:
+	@CGO_ENABLED=0 GOOS=linux go build -o bin/template_sample cmd/template_sample/main.go
+
 run: build
 	@./bin/main
 
